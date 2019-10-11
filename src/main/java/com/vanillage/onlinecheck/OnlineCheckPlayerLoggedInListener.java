@@ -5,11 +5,10 @@ import com.vanillage.minecraftalphaserver.event.PlayerLoggedInListener;
 
 public final class OnlineCheckPlayerLoggedInListener extends PlayerLoggedInListener {
     private final OnlineCheck plugin;
-    private final int priority;
     private String kickReason;
 
     public OnlineCheckPlayerLoggedInListener(OnlineCheck plugin) {
-        this(plugin, -5, null);
+        this(plugin, -10, null);
     }
 
     public OnlineCheckPlayerLoggedInListener(OnlineCheck plugin, int priority) {
@@ -17,16 +16,17 @@ public final class OnlineCheckPlayerLoggedInListener extends PlayerLoggedInListe
     }
 
     public OnlineCheckPlayerLoggedInListener(OnlineCheck plugin, String kickReason) {
-        this(plugin, -5, kickReason);
+        this(plugin, -10, kickReason);
     }
 
     public OnlineCheckPlayerLoggedInListener(OnlineCheck plugin, int priority, String kickReason) {
+        super(priority);
+
         if (plugin == null) {
             throw new IllegalArgumentException("plugin cannot be null");
         }
 
         this.plugin = plugin;
-        this.priority = priority;
         this.kickReason = kickReason == null ? "<username> is already online" : kickReason;
     }
 
@@ -47,15 +47,10 @@ public final class OnlineCheckPlayerLoggedInListener extends PlayerLoggedInListe
     }
 
     @Override
-    public void onEvent(PlayerLoggedInEvent event) {
+    protected void onEvent(PlayerLoggedInEvent event) {
         if (!event.isDenied() && plugin.getMinecraftServer().configManager.getPlayerEntity(event.getPacket().username) != null) {
             event.deny();
             event.setKickReason(kickReason.replace("<username>", event.getPacket().username));
         }
-    }
-
-    @Override
-    public int getPriority() {
-        return priority;
     }
 }
